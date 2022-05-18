@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import AutofillInputBox from './components/AutofillInputBox';
 
 function App() {
-  let data = [];
+  let [flightsData, updateFlightsData] = useState([]);
+  let [inputAutofill, updateInputAutofill] = useState([]);
 
   React.useEffect(() => {
     async function getData() {
@@ -14,16 +16,22 @@ function App() {
       const csv = decoder.decode(result.value);
       const flights = csv.split(/\n/);
       const headers = flights.shift().split(/,/);
-      // data = JSON.parse(csv);
+      let tempFlights = [], tempAutofill = [];
       for (let flightCount = 0; flightCount < flights.length; flightCount++) {
         let obj = {};
         const flight = flights[flightCount].split(/,/);
         for (let dataCount = 0; dataCount < headers.length; dataCount++) {
-          obj[headers[dataCount]] = flight[dataCount];
+          const currHeader = headers[dataCount];
+          const currData = flight[dataCount];
+          obj[currHeader] = currData;
+          if (currData && (currHeader === 'destination' || currHeader === 'destination_full_name' || currHeader === 'origin' || currHeader === 'origin_full_name') && !tempAutofill.includes(currData)) {
+            tempAutofill.push(currData);
+          }
         }
-        data[obj.id] = obj;
+        tempFlights[obj.id] = obj;
       }
-      console.log(data);
+      updateFlightsData(tempFlights);
+      updateInputAutofill(tempAutofill);
     }
     getData();
   }, []);
@@ -34,7 +42,7 @@ function App() {
         <div className="input-group-prepend">
           <span className="input-group-text" id="station">Enter a station:</span>
         </div>
-        <input type="text" className="form-control" placeholder="City or Airport Code" aria-label="City" aria-describedby="station" />
+        <AutofillInputBox inputAutofill={inputAutofill} />
       </div>
       <div id='data-table'></div>
       <header className="App-header">
