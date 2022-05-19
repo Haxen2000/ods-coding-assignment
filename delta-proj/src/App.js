@@ -62,7 +62,7 @@ function App() {
         <AutofillInputBox inputAutofill={inputAutofillList} getFlights={getFlights} />
       </div>
       {availableFlights.length > 0 && (
-        <table class="table table-bordered w-75 m-auto">
+        <table class="table table-bordered w-75 mx-auto mb-3">
           <thead>
             <tr>
               <th scope='col'>Flight Number</th>
@@ -86,20 +86,6 @@ function App() {
           </tbody>
         </table>
       )}
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
     </div>
   );
 }
