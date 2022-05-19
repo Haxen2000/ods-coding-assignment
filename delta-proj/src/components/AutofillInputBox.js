@@ -10,14 +10,20 @@ const AutofillInputBox = (props) => {
         updateInputStr(newStr);
         const str = new RegExp(newStr, 'i');
         let tempOptions = [];
-        for (let i = 0; e.type !== 'click' && i < list.length; i++) {
-            if (list[i].match(str)) {
-                tempOptions.push(list[i]);
+        if (e.type !== 'click') {
+            for (let key in list) {
+                if (key === 'length' || !list.hasOwnProperty(key)) continue;
+                if (key.match(str)) {
+                    tempOptions.push(key);
+                }
+                if (tempOptions.length > 10) {
+                    updateOptions(tempOptions);
+                    break;
+                }
             }
-            if (tempOptions.length > 10) {
-                updateOptions(tempOptions);
-                break;
-            }
+        }
+        else {
+            props.getFlights(newStr);
         }
         updateOptions(tempOptions);
     };
