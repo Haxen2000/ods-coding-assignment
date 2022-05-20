@@ -2,11 +2,17 @@ import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import AutofillInputBox from './components/AutofillInputBox';
+var moment = require('moment-timezone');
 
 function App() {
-  let [flightsData, updateFlightsData] = useState([]);
-  let [inputAutofillList, updateInputAutofill] = useState([]);
-  let [availableFlights, updateAvailableFlights] = useState([]);
+  const [flightsData, updateFlightsData] = useState([]);
+  const [inputAutofillList, updateInputAutofill] = useState([]);
+  const [availableFlights, updateAvailableFlights] = useState([]);
+  const shownPages = 5;
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pages, setPages] = useState([]);
+  const [displayedFlights, setDisplayedFlights] = useState([]);
 
   useEffect(() => {
     async function getData() {
@@ -37,20 +43,53 @@ function App() {
         tempFlights[obj.id] = obj;
       }
       updateFlightsData(tempFlights);
-      console.log(tempAutofill);
       updateInputAutofill(tempAutofill);
     }
     getData();
   }, []);
 
   const getFlights = (s) => {
-    console.log(inputAutofillList[s]);
+    setCurrentPage(1);
     const flightIds = inputAutofillList[s];
     let tempFlights = [];
     for (let i = 0; i < flightIds.length; i++) {
       tempFlights.push(flightsData[flightIds[i]]);
     }
     updateAvailableFlights(tempFlights);
+    determinePages(tempFlights, 1);
+  };
+
+  const determinePages = (flights, curr) => {
+    const tot = Math.ceil(flights.length / 10);
+    if (tot != totalPages) {
+      setTotalPages(tot);
+    }
+    let startPage = 1, endPage = 1;
+    let pagesArr = [];
+    if (tot > shownPages) {
+      startPage = Math.max(1, curr - Math.floor(shownPages / 2));
+      endPage = Math.min(tot, curr + Math.floor(shownPages / 2));
+      if (startPage > 2) {
+
+      }
+      if (endPage !== startPage + shownPages - 1) {
+        endPage = startPage + shownPages - 1;
+      }
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pagesArr.push(i);
+    }
+    setPages(pagesArr);
+
+    const start = (curr - 1) * 10;
+    setDisplayedFlights(flights.slice(start, start + 10));
+  }
+
+  const changePage = (num) => {
+    if (num < totalPages) {
+      setCurrentPage(num);
+    }
+    determinePages(availableFlights, num);
   };
 
   return (
@@ -66,26 +105,43 @@ function App() {
           <thead>
             <tr>
               <th scope='col'>Flight Number</th>
-              <th scope='col' colspan='2'>Departure</th>
-              <th scope='col' colspan='2'>Arrival</th>
+              <th scope='col' colSpan='2'>Departure</th>
+              <th scope='col' colSpan='2'>Arrival</th>
               
             </tr>
           </thead>
           <tbody>
-          {availableFlights.map(
+          {displayedFlights.map(
             flight => (
                 <tr>
                   <th>{flight.flt_num}</th>
                   <td>{flight.origin_full_name} ({flight.origin})</td>
-                  <td>{flight.out_gmt}</td>
+                  <td>{moment(flight.out_gmt).format("LLL")}</td>
                   <td>{flight.destination_full_name} ({flight.destination})</td>
-                  <td>{flight.in_gmt}</td>
+                  <td>{moment(flight.in_gmt).format("LLL")}</td>
                 </tr>
             )
           )}
           </tbody>
         </table>
       )}
+      {totalPages > 1 &&
+        <nav aria-label="Page navigation example">
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${1 === currentPage ? `disabled` : ''}`}>
+              <a className="page-link" href="#" onClick={(e) => changePage(currentPage - 1)}>Previous</a>
+            </li>
+            {pages.map(i => 
+              <li className={`page-item ${i === currentPage ? `active` : ''}`}>
+                <a className="page-link" href="#" onClick={(e) => changePage(parseInt(e.target.innerHTML))}>{i}</a>
+              </li>
+            )}
+            <li className={`page-item ${currentPage === totalPages ? `disabled` : ''}`}>
+              <a className="page-link" href="#" onClick={(e) => changePage(currentPage + 1)}>Next</a>
+            </li>
+          </ul>
+        </nav>
+      }
     </div>
   );
 }
