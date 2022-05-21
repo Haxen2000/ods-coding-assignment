@@ -36,3 +36,5 @@ However, you may use other tech if you are more comfortable with something else.
 * Return your solution within 3 business days, unless other directions provided.
 * Feel free to ask questions at any time.
 * Have fun with it! Your application can be as simple or complex as possible.
+
+With this example, a user can type in to the input at the top, select a city or airport code from the list, and the table below will show all of the flights in to and out of that airport. The table is paginated, with a limit of 10 flights per page. Given the time, I would add an option to increase the number of flights per page, and an option to sort by date.

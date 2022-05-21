@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import AutofillInputBox from './components/AutofillInputBox';
+import Pagination from './components/Pagination';
 var moment = require('moment-timezone');
 
 function App() {
@@ -45,7 +45,9 @@ function App() {
       updateFlightsData(tempFlights);
       updateInputAutofill(tempAutofill);
     }
-    getData();
+    if (!flightsData.length) {
+      getData();
+    }
   }, []);
 
   const getFlights = (s) => {
@@ -66,14 +68,15 @@ function App() {
     }
     let startPage = 1, endPage = 1;
     let pagesArr = [];
-    if (tot > shownPages) {
-      startPage = Math.max(1, curr - Math.floor(shownPages / 2));
-      endPage = Math.min(tot, curr + Math.floor(shownPages / 2));
-      if (startPage > 2) {
-
-      }
-      if (endPage !== startPage + shownPages - 1) {
-        endPage = startPage + shownPages - 1;
+    endPage = Math.min(tot, curr + Math.floor(shownPages / 2));
+    startPage = endPage - shownPages + 1;
+    if (startPage < 1) {
+      startPage = 1;
+    }
+    if (endPage !== startPage + shownPages - 1) {
+      endPage = startPage + shownPages - 1;
+      if (endPage > tot) {
+        endPage = tot;
       }
     }
     for (let i = startPage; i <= endPage; i++) {
@@ -86,7 +89,7 @@ function App() {
   }
 
   const changePage = (num) => {
-    if (num < totalPages) {
+    if (num <= totalPages) {
       setCurrentPage(num);
     }
     determinePages(availableFlights, num);
@@ -100,7 +103,8 @@ function App() {
         </div>
         <AutofillInputBox inputAutofill={inputAutofillList} getFlights={getFlights} />
       </div>
-      {availableFlights.length > 0 && (
+      {availableFlights.length > 0 && (<>
+        <p>Total flights: {availableFlights.length}</p>
         <table class="table table-bordered w-75 mx-auto mb-3">
           <thead>
             <tr>
@@ -124,24 +128,8 @@ function App() {
           )}
           </tbody>
         </table>
-      )}
-      {totalPages > 1 &&
-        <nav aria-label="Page navigation example">
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${1 === currentPage ? `disabled` : ''}`}>
-              <a className="page-link" href="#" onClick={(e) => changePage(currentPage - 1)}>Previous</a>
-            </li>
-            {pages.map(i => 
-              <li className={`page-item ${i === currentPage ? `active` : ''}`}>
-                <a className="page-link" href="#" onClick={(e) => changePage(parseInt(e.target.innerHTML))}>{i}</a>
-              </li>
-            )}
-            <li className={`page-item ${currentPage === totalPages ? `disabled` : ''}`}>
-              <a className="page-link" href="#" onClick={(e) => changePage(currentPage + 1)}>Next</a>
-            </li>
-          </ul>
-        </nav>
-      }
+      </>)}
+      <Pagination totalPages={totalPages} currentPage={currentPage} changePage={changePage} pages={pages} />
     </div>
   );
 }
