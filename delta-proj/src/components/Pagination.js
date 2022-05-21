@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 const Pagination = (props) => {
     const currentPage = props.currentPage;
     const changePage = props.changePage;
